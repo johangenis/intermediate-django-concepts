@@ -7,16 +7,26 @@ User = get_user_model()
 
 
 class UserRegisterForm(forms.ModelForm):
-    password2 = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = User
         fields = ["username", "email", "password", "password2"]
 
+    def clean(self, *args, **kwargs):
+        password = self.cleaned_data.get("password")
+        password2 = self.cleaned_data.get("password2")
+
+        if password and password2:
+            if password != password2:
+                raise forms.ValidationError("The passwords do not match")
+        return super(UserRegisterForm, self).clean(*args, **kwargs)
+
 
 class UserLoginForm(forms.Form):
     username = forms.CharField()
-    password = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self, *args, **kwargs):
         username = self.cleaned_data.get("username")
